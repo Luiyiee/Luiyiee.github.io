@@ -1,6 +1,6 @@
 ## Welcome to GitHub Pages
 
-      <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+   
 <df-messenger
   intent="WELCOME"
   chat-title="prueba"
@@ -8,6 +8,7 @@
   language-code="es"
 ></df-messenger>
   
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 
   
 <button type="button" onclick="init()">Start</button>
