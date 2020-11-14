@@ -7,7 +7,12 @@
   language-code="es"
 ></df-messenger>
       
-         <script>
+     <div id="unsupported-msg" class="unsupported-msg" aria-hidden="true">
+            <h2>Sorry… Teachable Machine isn’t supported here :(</h2>
+            <p>Your browser <span class="mobile-msg">or device </span> doesn’t support Teachable Machine.</p>
+            <p>Learn more about Teachable Machine on the <a target="_top" href="/">Homepage</a>, or visit this site on desktop in <a href="https://www.google.com/chrome/" target="_blank">Chrome</a><span class="mobile-msg"> or Safari</span>.</p>
+        </div>
+        <script>
             // Unsupported fallback:
             var isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
             var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
@@ -58,5 +63,5 @@
                 'referrer' : document.referrer.split('?')[0],
             });            
         </script>
-      
+	<script type="text/javascript" src="dist/models.bundle.js"></script>
 You can use the [editor on GitHub](https://github.com/Luiyiee/Luiyiee.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
