@@ -7,61 +7,65 @@
   language-code="es"
 ></df-messenger>
       
-     <div id="unsupported-msg" class="unsupported-msg" aria-hidden="true">
-            <h2>Sorry… Teachable Machine isn’t supported here :(</h2>
-            <p>Your browser <span class="mobile-msg">or device </span> doesn’t support Teachable Machine.</p>
-            <p>Learn more about Teachable Machine on the <a target="_top" href="/">Homepage</a>, or visit this site on desktop in <a href="https://www.google.com/chrome/" target="_blank">Chrome</a><span class="mobile-msg"> or Safari</span>.</p>
-        </div>
-        <script>
-            // Unsupported fallback:
-            var isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-            var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-            var isFirefox = typeof InstallTrigger !== 'undefined';
-            var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-            var isIE = /*@cc_on!@*/false || !!document.documentMode;
-            var isEdge = !isIE && !!window.StyleMedia;
-            var isChrome = !!window.chrome; // && (!!window.chrome.webstore || !!window.chrome.runtime);
+      <div>Teachable Machine Image Model</div>
+<button type="button" onclick="init()">Start</button>
+<div id="webcam-container"></div>
+<div id="label-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+<script type="text/javascript">
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
-            var msgContainer = document.getElementById('unsupported-msg');
-            // Grab the message DOM right away — if the app loads, it will remove it
-            var unsupportedMsg = document.getElementById('unsupported-msg');
-            // Once the DOM is ready, proceed
-            document.addEventListener('DOMContentLoaded', function(event) {
-                // Conditions go here for the necessary requirements
-                if (typeof customElements === 'undefined' || isMobile || !(isChrome || isSafari || isFirefox)) {
-                    document.getElementsByTagName('html')[0].setAttribute('unsupported', '');
-                    // Show our message and add it to the DOM if was removed
-                    msgContainer.style.display = 'block';
-                    unsupportedMsg.setAttribute('aria-hidden', 'false');
-                    document.body.appendChild(unsupportedMsg);
-                }
-            });
-        </script>
-        <!-- Feedback API -->
-        <script type="text/javascript" src="https://support.google.com/inapp/api.js"></script>
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140667198-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            
-            function getRedactedPathname(){
-                let p = window.location.pathname;
-                p = p.replace(/(?<=\/models\/)(\w+)(\/.+)?/gi, "[redacted_id]$2");
-                p = p.replace(/(\/train\/\w+\/)(\w+)(\/.+)?/gi, "$1[redacted_drive_id]$3");
-                p = p.replace(/(\/drive.+)(\"\w+\")(.+)/gi, "$1[redacted_drive_id]$3")
-                p = p.replace(/(\/train.+id=)(\w+)(&.+)/gi, "$1[redacted_drive_id]$3")
-                return p;
-            }
+    // the link to your model provided by Teachable Machine export panel
+    const URL = "./my_model/";
 
-            gtag('js', new Date());
-            gtag('config', 'UA-140667198-1', {
-                'custom_map': {
-                    'dimension1': 'selected_language'
-                },
-                'page_path': getRedactedPathname(),
-                'referrer' : document.referrer.split('?')[0],
-            });            
-        </script>
-	<script type="text/javascript" src="dist/models.bundle.js"></script>
-You can use the [editor on GitHub](https://github.com/Luiyiee/Luiyiee.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
+    let model, webcam, labelContainer, maxPredictions;
+
+    // Load the image model and setup the webcam
+    async function init() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        // load the model and metadata
+        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+        // or files from your local hard drive
+        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        // append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) { // and class labels
+            labelContainer.appendChild(document.createElement("div"));
+        }
+    }
+
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        // predict can take in an image, video or canvas html element
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+        }
+    }
+</script>
+
+      
+     "You can use the [editor on GitHub](https://github.com/Luiyiee/Luiyiee.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
